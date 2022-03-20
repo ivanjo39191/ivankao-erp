@@ -1,0 +1,101 @@
+{% extends 'admin/change_form.html' %}
+{% load static %}
+{% block submit_buttons_bottom %}
+{{ block.super }}
+<div class="submit-row">
+  <input id="_sum" type="submit" value="總金額: " name="_sum">
+  <input id="_export" type="submit" value="匯出" name="_export">
+</div>
+
+<script>
+
+django.jQuery('document').ready(function ($) {
+
+  $.fn.getTotals = function () {
+    let totalsList = $("tr[id^='relationalproduct_set-'] > td[class='field-total'] > p");
+    totals = 0;
+    totalsList.each(function( index ) {
+      let rowTotal = $(this).text();
+      if(!isNaN(rowTotal)){
+        // console.log(rowTotal);
+        totals = parseInt(totals) + parseInt(rowTotal);
+      }
+    });
+    // console.log(totals);
+    $('#_sum').val('總金額: '+ totals)
+  }
+  $.fn.getRowTotal = function (index) {
+    let retailPrice = $("tr[id='relationalproduct_set-"+ index +"'] > td[class='field-retail_price'] > p").text();
+    let number = $("input[id='id_relationalproduct_set-" + index + "-number']").val();
+    let discount = $("input[id='id_relationalproduct_set-" + index + "-discount']").val();
+    let = rowTotal = parseInt((parseInt(retailPrice) * parseInt(number) * (100 - parseInt(discount)) / 100));
+    let Total = $("tr[id='relationalproduct_set-"+ index +"'] > td[class='field-total'] > p");
+    Total.text(rowTotal);
+    $.fn.getTotals();
+  }
+  $.fn.getRetailPrice = function (index, retail_price) {
+    let retailPrice = $("tr[id='relationalproduct_set-"+ index +"'] > td[class='field-retail_price'] > p");
+    retailPrice.text(retail_price);
+    $.fn.getRowTotal(index);
+  }
+  $.fn.getProductList =  function(){
+    let productList = $("select[id^='id_relationalproduct_set-'][id$='-product']");
+    productList.each(function( index ) {
+      $(this).unbind();
+    });
+    productList.each(function( index ) {
+      $(this).change(function() {
+        let product_name = $(this).find("option:selected").text();
+
+        $.ajaxSetup({data:{csrfmiddlewaretoken:'{{ csrf_token }}'},});
+        $.ajax({
+            type: 'POST',
+            url:"{% url 'product:get_product_retail_price' %}",
+            data:{'name': product_name},
+            success: function(data){
+                let = retail_price = data['retail_price'];
+                $.fn.getRetailPrice(index, retail_price);
+            },
+            error: function(xhr, ajaxOptions, thrownError){
+                alert(xhr.status);
+                alert(thrownError);
+            }
+        });
+      });
+    });
+  }
+  $.fn.getNumberList =  function(){
+    let numberList = $("input[id^='id_relationalproduct_set-'][id$='-number']");
+    numberList.each(function( index ) {
+      $(this).unbind();
+    });
+    numberList.each(function( index ) {
+      $(this).change(function() {
+        $.fn.getRowTotal(index);
+      });
+    });
+  }
+  $.fn.getDiscountList =  function(){
+    let discountList = $("input[id^='id_relationalproduct_set-'][id$='-discount']");
+    discountList.each(function( index ) {
+      $(this).unbind();
+    });
+    discountList.each(function( index ) {
+      $(this).change(function() {
+        $.fn.getRowTotal(index);
+      });
+    });
+  }
+  $.fn.loadForm =  function(){
+    $.fn.getProductList();
+    $.fn.getNumberList();
+    $.fn.getDiscountList();
+    $.fn.getTotals();
+  }
+  $.fn.loadForm();
+  $(".add-row > td > a").click(function(){
+    $.fn.loadForm();
+  });
+});
+  </script>
+{% endblock %}
