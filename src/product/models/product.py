@@ -6,7 +6,7 @@ from model_utils.models import TimeStampedModel
 __all__ = ('Product', 'ProductType', 'SalesOrder', 'RelationalProduct')
 
 class SalesOrder(TimeStampedModel):
-    order_id = models.CharField('出貨單號', max_length=191, db_index=True, null=True, blank=True) # Order ID
+    order_id = models.CharField('出貨單號', max_length=191, db_index=True, unique=True) # Order ID
     customer = models.ForeignKey('product.Customer', blank=True, null=True, on_delete=models.CASCADE, related_name='salesorder_set')
     product = models.ManyToManyField('product.Product', blank=True, related_name='salesorder_set', through='product.RelationalProduct') 
     date = models.DateField('出貨日期', null=True, blank=True)  # 出貨日期
