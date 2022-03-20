@@ -1,6 +1,5 @@
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from easy_select2 import Select2
 
 from .models import *
 
@@ -19,7 +18,6 @@ class RelationalProductForm(forms.ModelForm):
         model = SalesOrder.product.through
         fields = '__all__'
         fields = ('product', 'number')
-        widgets = {'product': Select2(),}
         
     def __init__(self, *args, **kwargs):
         super(RelationalProductForm, self).__init__(*args, **kwargs)

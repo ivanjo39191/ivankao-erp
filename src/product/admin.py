@@ -9,6 +9,7 @@ from .forms import *
 # Register your models here.
 
 class RelationalProductInline(admin.TabularInline):
+    search_fields = ['product']
     model = SalesOrder.product.through
     verbose_name = '商品名稱'
     form = RelationalProductForm
@@ -16,6 +17,7 @@ class RelationalProductInline(admin.TabularInline):
     fields = ('product', 'retail_price', 'number', 'discount','total')
     readonly_fields = ('retail_price', 'total',)
     suit_classes = 'suit-tab suit-tab-general'
+    autocomplete_fields = ['product']
     
 
 
@@ -31,6 +33,7 @@ class ProductAdmin(admin.ModelAdmin):
     
 
     # list_display = ('name', 'retail_price', 'special_price', 'purchase_volume', 'sales_volume', 'inventory_volume')
+    search_fields = ['name']
     list_display = ('name', 'retail_price', 'purchase_volume', 'get_sales_volume', 'get_inventory_volume')
     get_sales_volume.short_description = '銷售量'
     get_inventory_volume.short_description = '庫存量'
@@ -46,6 +49,7 @@ class SalesOrderAdmin(admin.ModelAdmin):
     form = SalesOrderForm
     inlines = [RelationalProductInline,]
     change_form_template = "admin/product/export_changeform.html"
+    autocomplete_fields = ['customer']
     
     # def response_add(request, obj, post_url_continue=None):
     #     return redirect(f'/product/export/{obj.order_id}')
@@ -59,5 +63,5 @@ class SalesOrderAdmin(admin.ModelAdmin):
             
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-
+    search_fields = ['name']
     list_display = ('name', 'tax_id', 'phone', 'address')
